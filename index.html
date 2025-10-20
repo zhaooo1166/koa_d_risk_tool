@@ -3,237 +3,489 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KOA-D 风险预警工具原型</title>
-    <!-- 引入 Tailwind CSS CDN -->
+    <title>KOA-D 风险预警助手</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* 确保 Inter 字体，提供优秀的排版 */
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* 字体设置 */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
         }
-        /* 定制卡片基础样式 */
-        .question-card {
-            padding: 1.25rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
-            transition: transform 0.2s;
+        /* 隐藏输入字段的默认箭头 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
-        .question-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
-
-        /* 选项样式 */
-        .radio-input {
-            display: none;
-        }
-        .radio-label {
-            padding: 12px 18px;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease-in-out;
-            border: 2px solid #cbd5e1;
-            text-align: center;
-            flex-grow: 1;
-            font-size: 15px;
-            background-color: white;
-            color: #475569;
-        }
-        .radio-input:checked + .radio-label {
-            background-color: #3b82f6; /* 选中蓝色 */
-            color: white;
-            border-color: #3b82f6;
-            transform: scale(1.02);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.5);
-        }
-        .radio-label:hover:not(:has(:checked)) {
-            border-color: #60a5fa;
-        }
-
-        /* 结果区域样式 */
-        #resultBox {
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 1.5rem;
+            background-color: #0d9488; /* Teal color */
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            border-radius: 2px;
         }
     </style>
 </head>
-<body class="p-4 sm:p-10">
+<body class="p-4 sm:p-8 min-h-screen">
 
-    <div id="app" class="max-w-4xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-3xl border border-gray-100">
+    <div id="app" class="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden transform transition duration-500">
+        <!-- 头部标题 -->
+        <header class="bg-teal-600 p-6 text-white text-center">
+            <h1 class="text-3xl font-bold flex items-center justify-center">
+                <i data-lucide="activity" class="w-6 h-6 mr-3"></i>
+                KOA-D 风险预警助手
+            </h1>
+            <p class="mt-1 text-sm opacity-90">基于机器学习+ SHAP技术的KOA-D快速筛查工具（试用版）</p>
+        </header>
 
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2 border-b-4 pb-3 border-indigo-500/20">
-            KOA-D 精准风险预警工具（原型 v1.0）
-        </h1>
-        <p class="text-gray-500 mb-8 text-base">
-            基于机器学习模型的高权重因子简化评估，用于对骨关节炎（KOA）患者的抑郁共病（KOA-D）风险进行快速分级。
-        </p>
+        <!-- 风险评估表单 -->
+        <div class="p-6 md:p-10 space-y-8" id="assessment-form">
 
-        <div id="questionnaire" class="space-y-8">
+            <!-- 1. 生理与共病评估：心血管疾病史 (heart) - 权重最高 (da007 7) -->
+            <section class="bg-blue-50 p-6 rounded-lg shadow-md border border-blue-200">
+                <h2 class="text-xl font-semibold mb-4 text-blue-800 section-title">1. 生理共病评估（心血管疾病史）</h2>
+                <div class="space-y-3" id="q-heart">
+                    <label class="block text-gray-700 font-medium">1.1 患者是否有医生确诊的**心血管疾病**（如冠心病、中风、心衰等）？</label>
+                    <div class="flex flex-wrap gap-4">
+                        <button type="button" data-value="8" data-factor="heart" class="factor-btn bg-white hover:bg-blue-100 text-blue-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-blue-300">
+                            是 (高风险)
+                        </button>
+                        <button type="button" data-value="0" data-factor="heart" class="factor-btn bg-white hover:bg-blue-100 text-blue-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-blue-300">
+                            否
+                        </button>
+                    </div>
+                </div>
+            </section>
 
-            <!-- 问题组：5个核心风险因素 -->
+            <!-- 2. 生理与代谢评估：BMI (BMI) - 权重第二 (Biomarkers) -->
+            <section class="bg-emerald-50 p-6 rounded-lg shadow-md border border-emerald-200">
+                <h2 class="text-xl font-semibold mb-4 text-emerald-800 section-title">2. 生理代谢评估（BMI）</h2>
+                <div class="space-y-4">
+                    <div class="flex gap-4 items-end">
+                        <div class="w-full">
+                            <label for="height" class="block text-gray-700 font-medium">2.1 身高 (cm):</label>
+                            <input type="number" id="height" placeholder="请输入身高" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                        <div class="w-full">
+                            <label for="weight" class="block text-gray-700 font-medium">2.2 体重 (kg):</label>
+                            <input type="number" id="weight" placeholder="请输入体重" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                    </div>
+                    <div id="bmi-result" class="text-sm text-gray-600 mt-2">BMI: 0.00 | 状态: 待计算</div>
+                </div>
+            </section>
+
+            <!-- 3. 社会心理评估：夜间睡眠质量 (sleep_night) - 权重第三 (dc015: Sleep Was Restless) -->
+            <section class="bg-amber-50 p-6 rounded-lg shadow-md border border-amber-200">
+                <h2 class="text-xl font-semibold mb-4 text-amber-800 section-title">3. 社会心理评估（夜间睡眠质量）</h2>
+                <div class="space-y-3" id="q-sleep">
+                    <label class="block text-gray-700 font-medium">3.1 在过去一周中，您感觉**睡眠不安**（Sleep Was Restless）的频率是？</label>
+                    <div class="flex flex-wrap gap-4">
+                        <button type="button" data-value="0" data-factor="sleep" class="factor-btn bg-white hover:bg-amber-100 text-amber-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-amber-300">
+                            罕见或无 (Rarely or none)
+                        </button>
+                        <button type="button" data-value="4" data-factor="sleep" class="factor-btn bg-white hover:bg-amber-100 text-amber-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-amber-300">
+                            有些时间 (Some or a little time)
+                        </button>
+                        <button type="button" data-value="6" data-factor="sleep" class="factor-btn bg-white hover:bg-amber-100 text-amber-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-amber-300">
+                            大部分时间 (Most or all the time)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. 社会心理评估：孤独感 (loneliness) - 权重第四 (dc017: Felt Lonely) -->
+            <section class="bg-pink-50 p-6 rounded-lg shadow-md border border-pink-200">
+                <h2 class="text-xl font-semibold mb-4 text-pink-800 section-title">4. 社会心理评估（孤独感）</h2>
+                <div class="space-y-3" id="q-loneliness">
+                    <label class="block text-gray-700 font-medium">4.1 在过去一周中，您感觉**孤独**（Felt Lonely）的频率是？</label>
+                    <div class="flex flex-wrap gap-4">
+                        <button type="button" data-value="0" data-factor="loneliness" class="factor-btn bg-white hover:bg-pink-100 text-pink-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-pink-300">
+                            罕见或无 (Rarely or none)
+                        </button>
+                        <button type="button" data-value="3" data-factor="loneliness" class="factor-btn bg-white hover:bg-pink-100 text-pink-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-pink-300">
+                            有些时间 (Some or a little time)
+                        </button>
+                        <button type="button" data-value="6" data-factor="loneliness" class="factor-btn bg-white hover:bg-pink-100 text-pink-700 py-2 px-4 rounded-lg shadow-md transition duration-200 border border-pink-300">
+                            大部分时间 (Most or all the time)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. 功能状态评估：IADL_score (工具性日常生活活动能力) - 权重第五 (db019, db020) -->
+            <section class="bg-indigo-50 p-6 rounded-lg shadow-md border border-indigo-200">
+                <h2 class="text-xl font-semibold mb-4 text-indigo-800 section-title">5. 功能状态评估（IADL 受限）</h2>
+                <p class="text-sm text-gray-600 mb-4">请评估患者的**工具性日常生活活动能力 (IADL)**：</p>
+                <div class="space-y-4">
+                    <div id="q-iadl-1" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.1 **管理钱财** (Managing Assets)</label>
+                        <div class="flex gap-3 mt-1 sm:mt-0">
+                            <button type="button" data-value="0" data-factor="iadl1" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                独立 (无困难/仍可做)
+                            </button>
+                            <button type="button" data-value="3" data-factor="iadl1" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                需帮助/无法完成 (高风险)
+                            </button>
+                        </div>
+                    </div>
+                    <div id="q-iadl-2" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.2 **服用药物** (Taking Medications)</label>
+                        <div class="flex gap-3 mt-1 sm:mt-0">
+                            <button type="button" data-value="0" data-factor="iadl2" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                独立 (无困难/仍可做)
+                            </button>
+                            <button type="button" data-value="3" data-factor="iadl2" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                需帮助/无法完成 (高风险)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-4">*IADL 总得分越高，复杂功能受限越严重，风险越高。</p>
+            </section>
             
-            <!-- 1. 慢性疼痛程度 (最高权重临床因素) -->
-            <div class="question-card bg-indigo-50">
-                <label for="pain" class="block text-xl font-bold text-indigo-700 mb-4">
-                    1. 慢性疼痛程度评估
-                </label>
-                <div id="q1_options" class="grid grid-cols-3 gap-4">
-                    <input type="radio" id="pain_0" name="pain" class="radio-input" value="0" data-weight="0" checked>
-                    <label for="pain_0" class="radio-label">轻微/无（VAS 0-3）</label>
+            <!-- 风险评估按钮 -->
+            <div class="flex justify-center pt-4">
+                <button id="calculate-risk" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 text-xl flex items-center transform hover:scale-[1.02]">
+                    <i data-lucide="zap" class="w-5 h-5 mr-3"></i>
+                    计算 KOA-D 风险评估
+                </button>
+            </div>
 
-                    <input type="radio" id="pain_1" name="pain" class="radio-input" value="1" data-weight="4">
-                    <label for="pain_1" class="radio-label">中度疼痛（VAS 4-7）</label>
-
-                    <input type="radio" id="pain_2" name="pain" class="radio-input" value="2" data-weight="10">
-                    <label for="pain_2" class="radio-label">重度疼痛/严重影响功能（VAS 8-10）</label>
+            <!-- 风险评估结果 (默认隐藏) -->
+            <div id="risk-result-container" class="mt-8 p-6 md:p-8 rounded-xl shadow-2xl hidden transition duration-500 transform border-4 border-gray-300">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-red-600"></i>
+                    风险评估结果
+                </h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center pb-2 border-b">
+                        <span class="text-lg font-medium text-gray-600">综合风险总分:</span>
+                        <span id="risk-score" class="text-3xl font-extrabold text-teal-600">0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-2 rounded-lg" id="risk-level-display">
+                        <span class="text-lg font-medium text-gray-700">预警级别:</span>
+                        <span id="risk-level" class="text-2xl font-extrabold text-white px-4 py-1 rounded-full">--</span>
+                    </div>
+                </div>
+                
+                <!-- 预警级别解读和建议 -->
+                <div class="mt-6">
+                    <h3 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-3 flex items-center">
+                        <i data-lucide="file-text" class="w-4 h-4 mr-2 text-teal-600"></i>
+                        干预与转介建议
+                    </h3>
+                    <div id="intervention-advice" class="text-gray-700 space-y-3">
+                        <!-- 建议内容将由 JavaScript 填充 -->
+                    </div>
                 </div>
             </div>
 
-            <!-- 2. 社会参与度/独居状态 (最高权重社会心理因素) -->
-            <div class="question-card bg-blue-50">
-                <label for="social" class="block text-xl font-bold text-blue-700 mb-4">
-                    2. 社会参与度与居住状态评估
-                </label>
-                <div id="q2_options" class="grid grid-cols-2 gap-4">
-                    <input type="radio" id="social_0" name="social" class="radio-input" value="0" data-weight="0" checked>
-                    <label for="social_0" class="radio-label">高参与/非独居（经常社交，与家人同住）</label>
-
-                    <input type="radio" id="social_1" name="social" class="radio-input" value="1" data-weight="9">
-                    <label for="social_1" class="radio-label">低参与/独居/丧偶（少社交，独居或与非直系亲属同住）</label>
-                </div>
+             <!-- 错误或提示信息 -->
+             <div id="message-box" class="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-xl hidden z-50 transition duration-300">
+                请先完成所有必填选项和 BMI 计算。
             </div>
-
-            <!-- 3. 低 BMI/衰弱风险 (关键的营养和功能指标) -->
-            <div class="question-card bg-green-50">
-                <label for="frailty" class="block text-xl font-bold text-green-700 mb-4">
-                    3. 体质指数（BMI）与非故意体重减轻
-                </label>
-                <div id="q3_options" class="grid grid-cols-2 gap-4">
-                    <input type="radio" id="frailty_0" name="frailty" class="radio-input" value="0" data-weight="0" checked>
-                    <label for="frailty_0" class="radio-label">BMI正常/超重/肥胖 (≥18.5) 且无非故意减轻</label>
-
-                    <input type="radio" id="frailty_1" name="frailty" class="radio-input" value="1" data-weight="7">
-                    <label for="frailty_1" class="radio-label">BMI过低 (＜18.5) 或近半年有非故意体重减轻</label>
-                </div>
-            </div>
-
-            <!-- 4. 心血管疾病共病 (炎症负担标记) -->
-            <div class="question-card bg-red-50">
-                <label for="cardio" class="block text-xl font-bold text-red-700 mb-4">
-                    4. 是否合并心血管疾病（如高血压、冠心病、卒中）
-                </label>
-                <div id="q4_options" class="grid grid-cols-2 gap-4">
-                    <input type="radio" id="cardio_0" name="cardio" class="radio-input" value="0" data-weight="0" checked>
-                    <label for="cardio_0" class="radio-label">否</label>
-
-                    <input type="radio" id="cardio_1" name="cardio" class="radio-input" value="1" data-weight="8">
-                    <label for="cardio_1" class="radio-label">是（合并心血管疾病）</label>
-                </div>
-            </div>
-
-            <!-- 5. 消化系统疾病共病 (肠-脑轴机制) -->
-            <div class="question-card bg-yellow-50">
-                <label for="digestive" class="block text-xl font-bold text-yellow-700 mb-4">
-                    5. 是否合并消化系统疾病（如胃炎、消化道溃疡、肠易激）
-                </label>
-                <div id="q5_options" class="grid grid-cols-2 gap-4">
-                    <input type="radio" id="digestive_0" name="digestive" class="radio-input" value="0" data-weight="0" checked>
-                    <label for="digestive_0" class="radio-label">否</label>
-
-                    <input type="radio" id="digestive_1" name="digestive" class="radio-input" value="1" data-weight="6">
-                    <label for="digestive_1" class="radio-label">是（合并消化系统疾病）</label>
-                </div>
-            </div>
-
         </div>
-
-        <button id="calculateBtn" class="w-full mt-10 py-4 bg-indigo-600 text-white font-extrabold text-xl rounded-xl shadow-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-[1.005] hover:shadow-2xl">
-            点击评估风险等级
-        </button>
-
-        <!-- 结果展示区域 -->
-        <div id="resultBox" class="mt-10 p-8 rounded-2xl shadow-xl border-t-4 hidden" style="border-color: #3b82f6;">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b pb-2">评估结果与干预建议</h2>
-            
-            <div id="riskLevel" class="text-3xl font-extrabold mb-3"></div>
-            <div id="riskScore" class="text-xl font-semibold mb-4 text-gray-600"></div>
-            
-            <p id="recommendation" class="text-gray-700 leading-relaxed text-lg"></p>
-        </div>
-
-        <p class="text-center text-sm text-gray-400 mt-10 pt-4 border-t border-gray-100">
-            开发人员信息：谢娟（安徽建筑大学），李海龙（阜阳市第二人民医院），李春（合肥市第一人民医院） | 原型工具，非临床诊断用途
-        </p>
+        
+        <!-- 开发者信息页脚 -->
+        <footer class="bg-gray-100 p-4 text-center text-xs text-gray-500">
+            <p class="font-bold mb-1">项目开发者:</p>
+            <p>谢娟（安徽建筑大学）</p>
+            <p>李海龙（阜阳市第二人民医院）</p>
+            <p>李春（合肥市第一人民医院）</p>
+        </footer>
 
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const calculateBtn = document.getElementById('calculateBtn');
-            const questionnaire = document.getElementById('questionnaire');
-            const resultBox = document.getElementById('resultBox');
-            const riskScoreDisplay = document.getElementById('riskScore');
-            const riskLevelDisplay = document.getElementById('riskLevel');
-            const recommendationDisplay = document.getElementById('recommendation');
+        // 初始化 Lucide 图标
+        lucide.createIcons();
 
-            // 风险等级阈值 (总分范围：0 到 10 + 9 + 7 + 8 + 6 = 40)
-            const MAX_SCORE = 40;
-            const THRESHOLDS = {
-                LOW: 15,       // 低风险到中风险的临界点
-                MEDIUM: 25,    // 中风险到高风险的临界点
-            };
+        // 风险评分存储对象，用于跟踪每个因子的得分
+        const riskScores = {
+            heart: 0,
+            bmi: 0,
+            sleep: 0,
+            loneliness: 0,
+            iadl1: 0,
+            iadl2: 0,
+            isBmiCalculated: false
+        };
 
-            calculateBtn.addEventListener('click', () => {
-                let totalScore = 0;
+        // --- 核心逻辑：风险评估规则（模拟 GBDT/SHAP 简化版） ---
+        // 总分满分约为 33 分，分数越高，风险越高。
+        // 分数阈值：
+        // 低风险 (绿色): < 5 分
+        // 中风险 (黄色): 5 - 14 分
+        // 高风险 (橙色): 15 - 24 分
+        // 红色预警 (红色): >= 25 分 (叠加多种高权重因子)
+        
+        const riskThresholds = [
+            { threshold: 25, level: '红色预警', color: 'bg-red-600', text: '极高风险，急需多学科（MDT）干预。' },
+            { threshold: 15, level: '高风险', color: 'bg-orange-500', text: '风险显著，建议转介心理评估并启动社医联动。' },
+            { threshold: 5, level: '中风险', color: 'bg-amber-500', text: '存在潜在风险因子，建议家庭医生加强随访和教育。' },
+            { threshold: 0, level: '低风险', color: 'bg-green-500', text: '风险较低，保持常规慢病管理。' }
+        ];
 
-                // 遍历所有问题组，计算总分
-                const questionGroups = ['pain', 'social', 'frailty', 'cardio', 'digestive'];
+        // BMI 风险评分函数
+        function getBmiRiskScore(bmi) {
+            // 根据 CHARLS 研究结果，低健康 BMI (低于 18.5) 和 高 BMI (高于 28) 都可能是风险因素
+            // 此处简化为：低BMI和中度超重/肥胖均加分
+            if (bmi < 18.5) return 8; // 低体重 (衰弱风险) - 高风险
+            if (bmi >= 25 && bmi < 30) return 5; // 超重
+            if (bmi >= 30) return 7; // 肥胖
+            return 0; // 正常体重 (18.5 - 24.9)
+        }
+
+        // --- DOM 元素和事件处理 ---
+
+        const messageBox = document.getElementById('message-box');
+        const bmiResultDiv = document.getElementById('bmi-result'); // 确保在全局作用域中可访问
+
+        // 显示提示信息
+        function showMessage(text) {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 处理按钮选择事件
+        document.querySelectorAll('.factor-btn, .iadl-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                const factor = target.getAttribute('data-factor');
+                const value = parseInt(target.getAttribute('data-value'));
                 
-                questionGroups.forEach(groupName => {
-                    const selected = questionnaire.querySelector(`input[name="${groupName}"]:checked`);
-                    if (selected) {
-                        const weight = parseInt(selected.getAttribute('data-weight') || 0);
-                        totalScore += weight;
-                    }
+                // 移除同一因子组中其他按钮的选中样式
+                const parent = target.closest('div');
+                // 优化：使用更精确的父元素选择器或 ID
+                const selector = parent.id ? `#${parent.id} button` : `[data-factor="${factor}"]`;
+                parent.querySelectorAll(selector).forEach(btn => {
+                    btn.classList.remove('bg-teal-200', 'border-teal-600', 'font-bold');
+                    // 恢复原始背景色，根据按钮组的颜色来恢复，这里简化为白色
+                    btn.classList.add('bg-white'); 
                 });
 
-                // 确定风险等级、颜色和建议
-                let level, color, recommendationText, borderColor;
-
-                if (totalScore >= THRESHOLDS.MEDIUM) {
-                    level = '高风险 (High Risk)';
-                    color = 'text-red-600';
-                    borderColor = '#dc2626'; // Red-600
-                    recommendationText = `**极高风险**。该患者应被视为 KOA-D 高危人群。**建议立即转诊**至医联体或上级医院的**多学科协作（MDT）门诊**，进行疼痛科、康复科、心理科的联合评估与整合干预。`;
-                } else if (totalScore >= THRESHOLDS.LOW) {
-                    level = '中风险 (Medium Risk)';
-                    color = 'text-yellow-600';
-                    borderColor = '#f59e0b'; // Yellow-600
-                    recommendationText = `**中度风险**。该患者应纳入基层医疗机构的 KOA **重点管理对象**。建议加强社区社工的**社会支持干预**和**个性化运动康复指导**，并定期（每季度）使用专业量表评估抑郁症状。`;
-                } else {
-                    level = '低风险 (Low Risk)';
-                    color = 'text-green-600';
-                    borderColor = '#10b981'; // Green-600
-                    recommendationText = `**低风险**。可维持常规的 KOA 慢病管理。建议进行健康教育，指导患者保持积极的社交和体力活动，并监测疼痛或共病状态，以进行早期干预。`;
-                }
-
-                // 更新结果展示
-                riskScoreDisplay.textContent = `总风险权重分：${totalScore} / ${MAX_SCORE}`;
-                riskLevelDisplay.className = `text-3xl font-extrabold mb-3 ${color}`;
-                riskLevelDisplay.textContent = `风险等级：${level}`;
-                recommendationDisplay.innerHTML = recommendationText;
+                // 添加当前按钮的选中样式
+                target.classList.add('bg-teal-200', 'border-teal-600', 'font-bold');
+                target.classList.remove('bg-white');
                 
-                // 显示结果区域并设置颜色
-                resultBox.style.borderColor = borderColor;
-                resultBox.classList.remove('hidden');
-                setTimeout(() => { resultBox.style.opacity = 1; }, 10); // 确保动画生效
-                
-                // 滚动到结果区域
-                resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // 更新得分
+                riskScores[factor] = value;
             });
         });
+
+        // 处理 BMI 输入和计算
+        const heightInput = document.getElementById('height');
+        const weightInput = document.getElementById('weight');
+        
+
+        [heightInput, weightInput].forEach(input => {
+            input.addEventListener('input', () => {
+                const height = parseFloat(heightInput.value);
+                const weight = parseFloat(weightInput.value);
+                
+                if (height > 50 && weight > 10) { // 简单校验
+                    const bmi = weight / ((height / 100) ** 2);
+                    const roundedBmi = bmi.toFixed(2);
+                    
+                    const riskScore = getBmiRiskScore(bmi);
+                    riskScores.bmi = riskScore;
+                    riskScores.isBmiCalculated = true; // 标记已计算
+                    
+                    let statusText = '正常';
+                    if (bmi < 18.5) statusText = '低体重 (衰弱风险)';
+                    else if (bmi >= 25 && bmi < 30) statusText = '超重';
+                    else if (bmi >= 30) statusText = '肥胖';
+
+                    let statusColor = (riskScore > 0) ? 'text-red-500' : 'text-green-600';
+
+                    // **************************************************
+                    // ** 核心修改：移除 BMI 结果后面的得分信息 (得分: ${riskScore}) **
+                    // **************************************************
+                    bmiResultDiv.innerHTML = `BMI: <span class="font-bold">${roundedBmi}</span> | 状态: <span class="${statusColor} font-bold">${statusText}</span>`;
+                } else {
+                    riskScores.bmi = 0;
+                    riskScores.isBmiCalculated = false;
+                    bmiResultDiv.innerHTML = `BMI: 0.00 | 状态: 待计算`;
+                }
+            });
+        });
+
+        // --- 计算风险总分和评估级别 ---
+        document.getElementById('calculate-risk').addEventListener('click', () => {
+            // 校验所有必填项是否已选择/计算
+            // 检查除 isBmiCalculated 以外的所有因子是否有定义值 (0 是有效值)
+            const requiredFactors = ['heart', 'sleep', 'loneliness', 'iadl1', 'iadl2'];
+            const allFactorsSelected = requiredFactors.every(key => riskScores[key] !== undefined);
+            
+            if (!allFactorsSelected || !riskScores.isBmiCalculated) {
+                showMessage("请完成所有问卷选项和 BMI 计算！");
+                return;
+            }
+
+            // 1. 计算总分
+            const heartScore = riskScores.heart;
+            const bmiScore = riskScores.bmi;
+            const sleepScore = riskScores.sleep;
+            const lonelinessScore = riskScores.loneliness;
+            const iadl1Score = riskScores.iadl1;
+            const iadl2Score = riskScores.iadl2;
+
+            // 2. 假设用户输入的得分是：心血管8分，睡眠6分，孤独感3分，IADL共6分。总分为 23分。
+            // 如果您的截图是 21 分，那么肯定是某一因子被赋予了低于离散值的分数。
+            // 我们现在使用实际计算结果:
+            const calculatedTotalScore = heartScore + bmiScore + sleepScore + lonelinessScore + iadl1Score + iadl2Score;
+
+
+            // 3. 确定风险级别
+            let finalRisk = riskThresholds[riskThresholds.length - 1]; // 默认低风险
+            for (const risk of riskThresholds) {
+                if (calculatedTotalScore >= risk.threshold) {
+                    finalRisk = risk;
+                    break;
+                }
+            }
+            
+            // 4. 生成详细干预建议
+            const adviceHTML = generateAdvice({
+                heart: heartScore,
+                bmi: bmiScore,
+                sleep: sleepScore,
+                loneliness: lonelinessScore,
+                iadl1: iadl1Score,
+                iadl2: iadl2Score
+            }, finalRisk, calculatedTotalScore);
+
+            // 5. 更新 UI 结果
+            const resultContainer = document.getElementById('risk-result-container');
+            const riskScoreDisplay = document.getElementById('risk-score');
+            const riskLevelDisplay = document.getElementById('risk-level');
+            const riskLevelText = document.getElementById('risk-level');
+            const interventionAdvice = document.getElementById('intervention-advice');
+
+            riskScoreDisplay.textContent = calculatedTotalScore;
+            riskLevelText.textContent = finalRisk.level;
+            riskLevelText.className = `text-2xl font-extrabold text-white px-4 py-1 rounded-full ${finalRisk.color}`;
+            interventionAdvice.innerHTML = adviceHTML;
+            
+            // 确保结果容器在更新后显示，并应用动画效果
+            resultContainer.classList.remove('hidden', 'scale-95');
+            resultContainer.classList.add('border-teal-600', 'scale-100');
+
+            // 平滑滚动到结果区域
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        // --- 根据得分生成干预建议 ---
+        function generateAdvice(scores, finalRisk, totalScore) {
+            let advice = `<p class="text-lg font-bold ${finalRisk.color.replace('bg-', 'text-')}">${finalRisk.level} - ${finalRisk.text}</p>`;
+            advice += '<p class="text-sm mt-2 text-gray-500">（以下建议是基于您的最高风险因子自动生成的，请结合临床判断。）</p>';
+            
+            // 新增：显示所有分项得分，方便用户核对
+            advice += '<div class="mt-3 p-3 bg-gray-50 rounded-lg">';
+            advice += `<p class="font-semibold text-gray-800">分项得分总览 (总和: ${totalScore} 分):</p>`;
+            advice += '<ul class="text-sm list-disc list-inside ml-4 mt-1 space-y-1">';
+            advice += `<li class="text-blue-700">心血管疾病史: ${scores.heart} 分</li>`;
+            advice += `<li class="text-emerald-700">BMI（代谢风险）: ${scores.bmi} 分</li>`;
+            advice += `<li class="text-amber-700">夜间睡眠质量: ${scores.sleep} 分</li>`;
+            advice += `<li class="text-pink-700">孤独感: ${scores.loneliness} 分</li>`;
+            advice += `<li class="text-indigo-700">IADL-管理钱财: ${scores.iadl1} 分</li>`;
+            advice += `<li class="text-indigo-700">IADL-服用药物: ${scores.iadl2} 分</li>`;
+            advice += '</ul></div>';
+
+            // 原始的干预建议生成逻辑 (只针对得分 > 0 的因子)
+            advice += '<ul class="list-disc list-inside space-y-2 mt-3 pl-4">';
+
+            // 1. 心血管疾病合并症 (heart) - 权重最高 (8分)
+            if (scores.heart > 0) {
+                advice += `
+                    <li class="font-semibold text-blue-700">生理首要靶点：心血管共病</li>
+                    <p class="text-gray-700 text-sm">建议立即纳入**心内科/慢性病管理科**随访。将患者视为高炎症负荷人群，需实施**整合医疗**，而不是单一骨科治疗。</p>
+                `;
+            }
+
+            // 2. BMI (5/8分) - 低体重或肥胖
+            if (scores.bmi > 0) {
+                // 注意：在生成 advice 时，需要确保 BMI 已经计算过，这里假设了已计算
+                const height = parseFloat(document.getElementById('height').value);
+                const weight = parseFloat(document.getElementById('weight').value);
+                const bmi = weight / ((height / 100) ** 2);
+                const bmiStatus = bmi.toFixed(2);
+
+                const bmiText = (bmi < 18.5) ? '低体重/衰弱风险' : '超重/肥胖';
+                advice += `
+                    <li class="font-semibold text-emerald-700">代谢健康风险：${bmiText}</li>
+                    <p class="text-gray-700 text-sm">建议转介**营养师**。如果是**低体重**，需重点评估营养不良和衰弱；如果是**肥胖**，需制定个性化体重管理和低冲击运动方案。</p>
+                `;
+            }
+
+            // 3. 夜间睡眠质量 (sleep) - 不好/很差 (6分)
+            if (scores.sleep >= 6) {
+                advice += `
+                    <li class="font-semibold text-amber-700">社会心理风险：严重睡眠障碍</li>
+                    <p class="text-gray-700 text-sm">建议评估睡眠卫生和环境，可考虑转介心理科进行认知行为疗法（CBT-I），改善睡眠是干预抑郁的**便捷切入点**。</p>
+                `;
+            } else if (scores.sleep >= 4) {
+                advice += `
+                    <li class="font-semibold text-amber-600">社会心理风险：中度睡眠不安</li>
+                    <p class="text-gray-700 text-sm">建议评估睡眠习惯，提供基础睡眠卫生指导，并加强后续随访。</p>
+                `;
+            }
+
+            // 4. 孤独感 (loneliness) - 是/不确定 (6分)
+            if (scores.loneliness >= 6) {
+                advice += `
+                    <li class="font-semibold text-pink-700">社会心理核心风险：重度孤独感</li>
+                    <p class="text-gray-700 text-sm">**红色警报**：需立即启动**社医联动**。社区工作者或家庭医生需提供主动心理慰藉和社交活动引荐，打破社会隔离。</p>
+                `;
+            } else if (scores.loneliness >= 3) {
+                 advice += `
+                    <li class="font-semibold text-pink-600">社会心理风险：中度孤独感</li>
+                    <p class="text-gray-700 text-sm">建议启动社区资源对接，鼓励患者参与互助小组或文娱活动，加强社会支持网络。</p>
+                `;
+            }
+
+            // 5. IADL_score (iadl1, iadl2) - 复杂功能受限 (最高6分)
+            const iadlScore = scores.iadl1 + scores.iadl2;
+            if (iadlScore > 0) {
+                advice += `
+                    <li class="font-semibold text-indigo-700">复杂功能受限：IADL障碍</li>
+                    <p class="text-gray-700 text-sm">患者独立性受损，建议转介**康复师**。社区应提供**日常支持服务**（如辅助服药、管理钱财），重建患者的**自我效能感**。</p>
+                `;
+            }
+
+            advice += '</ul>';
+
+            if (finalRisk.threshold >= 15) {
+                advice += `
+                    <div class="mt-4 p-3 bg-red-50 border-l-4 border-red-500">
+                        <p class="font-bold text-red-800">MDT 协作建议:</p>
+                        <p class="text-sm text-red-700">该患者应纳入**多学科协作（MDT）联合门诊**。主要由心内科、心理科、康复科共同制定整合干预方案。</p>
+                    </div>
+                `;
+            }
+
+            return advice;
+        }
+
     </script>
 </body>
 </html>
