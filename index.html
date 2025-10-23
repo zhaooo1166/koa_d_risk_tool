@@ -1,12 +1,12 @@
+HTML
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KOA-D 风险预警助手</title>
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* 自定义滚动条样式 */
@@ -44,7 +44,6 @@
 <body class="p-4 sm:p-8 min-h-screen">
 
     <div id="app" class="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden transform transition duration-500">
-        <!-- 头部标题 -->
         <header class="bg-teal-600 p-6 text-white text-center">
             <h1 class="text-3xl font-bold flex items-center justify-center">
                 <i data-lucide="activity" class="w-6 h-6 mr-3"></i>
@@ -53,10 +52,8 @@
             <p class="mt-1 text-sm opacity-90">基于机器学习+ SHAP技术的KOA-D快速筛查工具（试用版）</p>
         </header>
 
-        <!-- 风险评估表单 -->
         <div class="p-6 md:p-10 space-y-8" id="assessment-form">
 
-            <!-- 1. 生理与共病评估：心血管疾病史 (heart) - 权重最高 (da007 7) -->
             <section class="bg-blue-50 p-6 rounded-lg shadow-md border border-blue-200">
                 <h2 class="text-xl font-semibold mb-4 text-blue-800 section-title">1. 生理共病评估（心血管疾病史）</h2>
                 <div class="space-y-3" id="q-heart">
@@ -72,7 +69,6 @@
                 </div>
             </section>
 
-            <!-- 2. 生理与代谢评估：BMI (BMI) - 权重第二 (Biomarkers) -->
             <section class="bg-emerald-50 p-6 rounded-lg shadow-md border border-emerald-200">
                 <h2 class="text-xl font-semibold mb-4 text-emerald-800 section-title">2. 生理代谢评估（BMI）</h2>
                 <div class="space-y-4">
@@ -90,7 +86,6 @@
                 </div>
             </section>
 
-            <!-- 3. 社会心理评估：夜间睡眠质量 (sleep_night) - 权重第三 (dc015: Sleep Was Restless) -->
             <section class="bg-amber-50 p-6 rounded-lg shadow-md border border-amber-200">
                 <h2 class="text-xl font-semibold mb-4 text-amber-800 section-title">3. 社会心理评估（夜间睡眠质量）</h2>
                 <div class="space-y-3" id="q-sleep">
@@ -109,7 +104,6 @@
                 </div>
             </section>
 
-            <!-- 4. 社会心理评估：孤独感 (loneliness) - 权重第四 (dc017: Felt Lonely) -->
             <section class="bg-pink-50 p-6 rounded-lg shadow-md border border-pink-200">
                 <h2 class="text-xl font-semibold mb-4 text-pink-800 section-title">4. 社会心理评估（孤独感）</h2>
                 <div class="space-y-3" id="q-loneliness">
@@ -128,38 +122,86 @@
                 </div>
             </section>
 
-            <!-- 5. 功能状态评估：IADL_score (工具性日常生活活动能力) - 权重第五 (db019, db020) -->
             <section class="bg-indigo-50 p-6 rounded-lg shadow-md border border-indigo-200">
                 <h2 class="text-xl font-semibold mb-4 text-indigo-800 section-title">5. 功能状态评估（IADL 受限）</h2>
-                <p class="text-sm text-gray-600 mb-4">请评估患者的**工具性日常生活活动能力 (IADL)**：</p>
+                <p class="text-sm text-gray-600 mb-4">请评估患者的**工具性日常生活活动能力 (IADL)** (6项)：</p>
                 <div class="space-y-4">
+                    
                     <div id="q-iadl-1" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
-                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.1 **管理钱财** (Managing Assets)</label>
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.1 **做家务/整理房间** (Housework)</label>
                         <div class="flex gap-3 mt-1 sm:mt-0">
                             <button type="button" data-value="0" data-factor="iadl1" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
                                 独立 (无困难/仍可做)
                             </button>
                             <button type="button" data-value="3" data-factor="iadl1" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
-                                需帮助/无法完成 (高风险)
+                                需帮助/无法完成 (风险 +3)
                             </button>
                         </div>
                     </div>
+
                     <div id="q-iadl-2" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
-                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.2 **服用药物** (Taking Medications)</label>
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.2 **做饭** (Cooking)</label>
                         <div class="flex gap-3 mt-1 sm:mt-0">
                             <button type="button" data-value="0" data-factor="iadl2" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
                                 独立 (无困难/仍可做)
                             </button>
                             <button type="button" data-value="3" data-factor="iadl2" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
-                                需帮助/无法完成 (高风险)
+                                需帮助/无法完成 (风险 +3)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="q-iadl-3" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.3 **购物** (Shopping)</label>
+                        <div class="flex gap-3 mt-1 sm:mt-0">
+                            <button type="button" data-value="0" data-factor="iadl3" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                独立 (无困难/仍可做)
+                            </button>
+                            <button type="button" data-value="3" data-factor="iadl3" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                需帮助/无法完成 (风险 +3)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="q-iadl-4" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.4 **管理钱财** (Managing Assets)</label>
+                        <div class="flex gap-3 mt-1 sm:mt-0">
+                            <button type="button" data-value="0" data-factor="iadl4" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                独立 (无困难/仍可做)
+                            </button>
+                            <button type="button" data-value="3" data-factor="iadl4" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                需帮助/无法完成 (风险 +3)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="q-iadl-5" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.5 **服用药物** (Taking Medications)</label>
+                        <div class="flex gap-3 mt-1 sm:mt-0">
+                            <button type="button" data-value="0" data-factor="iadl5" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                独立 (无困难/仍可做)
+                            </button>
+                            <button type="button" data-value="3" data-factor="iadl5" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                需帮助/无法完成 (风险 +3)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="q-iadl-6" class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-3 rounded-lg shadow-sm border border-indigo-100">
+                        <label class="text-gray-700 font-medium mb-1 sm:mb-0">5.6 **打电话** (Telephoning)</label>
+                        <div class="flex gap-3 mt-1 sm:mt-0">
+                            <button type="button" data-value="0" data-factor="iadl6" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                独立 (无困难/仍可做)
+                            </button>
+                            <button type="button" data-value="3" data-factor="iadl6" class="iadl-btn bg-white hover:bg-indigo-100 text-indigo-700 py-1 px-3 rounded transition duration-200 border border-indigo-300">
+                                需帮助/无法完成 (风险 +3)
                             </button>
                         </div>
                     </div>
                 </div>
-                <p class="text-xs text-gray-500 mt-4">*IADL 总得分越高，复杂功能受限越严重，风险越高。</p>
+                <p class="text-xs text-gray-500 mt-4">*IADL 总得分 (6项总和) 越高，复杂功能受限越严重，风险越高。</p>
             </section>
             
-            <!-- 风险评估按钮 -->
             <div class="flex justify-center pt-4">
                 <button id="calculate-risk" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 text-xl flex items-center transform hover:scale-[1.02]">
                     <i data-lucide="zap" class="w-5 h-5 mr-3"></i>
@@ -167,7 +209,6 @@
                 </button>
             </div>
 
-            <!-- 风险评估结果 (默认隐藏) -->
             <div id="risk-result-container" class="mt-8 p-6 md:p-8 rounded-xl shadow-2xl hidden transition duration-500 transform border-4 border-gray-300">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                     <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-red-600"></i>
@@ -184,30 +225,28 @@
                     </div>
                 </div>
                 
-                <!-- 预警级别解读和建议 -->
                 <div class="mt-6">
                     <h3 class="text-xl font-semibold text-gray-800 border-b pb-2 mb-3 flex items-center">
                         <i data-lucide="file-text" class="w-4 h-4 mr-2 text-teal-600"></i>
                         干预与转介建议
                     </h3>
                     <div id="intervention-advice" class="text-gray-700 space-y-3">
-                        <!-- 建议内容将由 JavaScript 填充 -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
-             <!-- 错误或提示信息 -->
              <div id="message-box" class="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-xl hidden z-50 transition duration-300">
                 请先完成所有必填选项和 BMI 计算。
             </div>
         </div>
         
-        <!-- 开发者信息页脚 -->
         <footer class="bg-gray-100 p-4 text-center text-xs text-gray-500">
             <p class="font-bold mb-1">项目开发者:</p>
             <p>谢娟（安徽建筑大学）</p>
             <p>李海龙（阜阳市第二人民医院）</p>
+           <p>谢新平（安徽建筑大学）</p>
             <p>李春（合肥市第一人民医院）</p>
+            <p>邱剑锋（安徽大学）</p>
         </footer>
 
     </div>
@@ -218,34 +257,33 @@
 
         // 风险评分存储对象，用于跟踪每个因子的得分
         const riskScores = {
-            heart: 0,
-            bmi: 0,
-            sleep: 0,
-            loneliness: 0,
-            iadl1: 0,
-            iadl2: 0,
+            heart: undefined,
+            bmi: undefined,
+            sleep: undefined,
+            loneliness: undefined,
+            // 6项 IADL
+            iadl1: undefined, // 做家务
+            iadl2: undefined, // 做饭
+            iadl3: undefined, // 购物
+            iadl4: undefined, // 管理钱财
+            iadl5: undefined, // 服药
+            iadl6: undefined, // 打电话
             isBmiCalculated: false
         };
 
         // --- 核心逻辑：风险评估规则（模拟 GBDT/SHAP 简化版） ---
-        // 总分满分约为 33 分，分数越高，风险越高。
-        // 分数阈值：
-        // 低风险 (绿色): < 5 分
-        // 中风险 (黄色): 5 - 14 分
-        // 高风险 (橙色): 15 - 24 分
-        // 红色预警 (红色): >= 25 分 (叠加多种高权重因子)
-        
+        // 总分满分约为 46 分 (8 + 8 + 6 + 6 + 18)
         const riskThresholds = [
-            { threshold: 25, level: '红色预警', color: 'bg-red-600', text: '极高风险，急需多学科（MDT）干预。' },
-            { threshold: 15, level: '高风险', color: 'bg-orange-500', text: '风险显著，建议转介心理评估并启动社医联动。' },
-            { threshold: 5, level: '中风险', color: 'bg-amber-500', text: '存在潜在风险因子，建议家庭医生加强随访和教育。' },
+            // 阈值根据新的总分上限 46 分调整
+            { threshold: 33, level: '红色预警', color: 'bg-red-600', text: '极高风险，急需多学科（MDT）干预。' },
+            { threshold: 21, level: '高风险', color: 'bg-orange-500', text: '风险显著，建议转介心理评估并启动社医联动。' },
+            { threshold: 10, level: '中风险', color: 'bg-amber-500', text: '存在潜在风险因子，建议家庭医生加强随访和教育。' },
             { threshold: 0, level: '低风险', color: 'bg-green-500', text: '风险较低，保持常规慢病管理。' }
         ];
 
         // BMI 风险评分函数
         function getBmiRiskScore(bmi) {
             // 根据 CHARLS 研究结果，低健康 BMI (低于 18.5) 和 高 BMI (高于 28) 都可能是风险因素
-            // 此处简化为：低BMI和中度超重/肥胖均加分
             if (bmi < 18.5) return 8; // 低体重 (衰弱风险) - 高风险
             if (bmi >= 25 && bmi < 30) return 5; // 超重
             if (bmi >= 30) return 7; // 肥胖
@@ -255,7 +293,7 @@
         // --- DOM 元素和事件处理 ---
 
         const messageBox = document.getElementById('message-box');
-        const bmiResultDiv = document.getElementById('bmi-result'); // 确保在全局作用域中可访问
+        const bmiResultDiv = document.getElementById('bmi-result');
 
         // 显示提示信息
         function showMessage(text) {
@@ -275,11 +313,9 @@
                 
                 // 移除同一因子组中其他按钮的选中样式
                 const parent = target.closest('div');
-                // 优化：使用更精确的父元素选择器或 ID
                 const selector = parent.id ? `#${parent.id} button` : `[data-factor="${factor}"]`;
                 parent.querySelectorAll(selector).forEach(btn => {
                     btn.classList.remove('bg-teal-200', 'border-teal-600', 'font-bold');
-                    // 恢复原始背景色，根据按钮组的颜色来恢复，这里简化为白色
                     btn.classList.add('bg-white'); 
                 });
 
@@ -296,7 +332,6 @@
         const heightInput = document.getElementById('height');
         const weightInput = document.getElementById('weight');
         
-
         [heightInput, weightInput].forEach(input => {
             input.addEventListener('input', () => {
                 const height = parseFloat(heightInput.value);
@@ -317,12 +352,9 @@
 
                     let statusColor = (riskScore > 0) ? 'text-red-500' : 'text-green-600';
 
-                    // **************************************************
-                    // ** 核心修改：移除 BMI 结果后面的得分信息 (得分: ${riskScore}) **
-                    // **************************************************
                     bmiResultDiv.innerHTML = `BMI: <span class="font-bold">${roundedBmi}</span> | 状态: <span class="${statusColor} font-bold">${statusText}</span>`;
                 } else {
-                    riskScores.bmi = 0;
+                    riskScores.bmi = undefined; // BMI值未计算成功，设为 undefined
                     riskScores.isBmiCalculated = false;
                     bmiResultDiv.innerHTML = `BMI: 0.00 | 状态: 待计算`;
                 }
@@ -331,9 +363,10 @@
 
         // --- 计算风险总分和评估级别 ---
         document.getElementById('calculate-risk').addEventListener('click', () => {
-            // 校验所有必填项是否已选择/计算
-            // 检查除 isBmiCalculated 以外的所有因子是否有定义值 (0 是有效值)
-            const requiredFactors = ['heart', 'sleep', 'loneliness', 'iadl1', 'iadl2'];
+            // 校验所有必填项是否已选择/计算 (9个因子)
+            const requiredFactors = ['heart', 'bmi', 'sleep', 'loneliness', 'iadl1', 'iadl2', 'iadl3', 'iadl4', 'iadl5', 'iadl6'];
+            
+            // 检查除 isBmiCalculated 外的所有因子是否已赋值 (包括 0)
             const allFactorsSelected = requiredFactors.every(key => riskScores[key] !== undefined);
             
             if (!allFactorsSelected || !riskScores.isBmiCalculated) {
@@ -341,19 +374,17 @@
                 return;
             }
 
-            // 1. 计算总分
+            // 1. 获取所有分项得分
             const heartScore = riskScores.heart;
             const bmiScore = riskScores.bmi;
             const sleepScore = riskScores.sleep;
             const lonelinessScore = riskScores.loneliness;
-            const iadl1Score = riskScores.iadl1;
-            const iadl2Score = riskScores.iadl2;
+            
+            // 计算 6 项 IADL 总分
+            const iadlScoreTotal = riskScores.iadl1 + riskScores.iadl2 + riskScores.iadl3 + riskScores.iadl4 + riskScores.iadl5 + riskScores.iadl6;
 
-            // 2. 假设用户输入的得分是：心血管8分，睡眠6分，孤独感3分，IADL共6分。总分为 23分。
-            // 如果您的截图是 21 分，那么肯定是某一因子被赋予了低于离散值的分数。
-            // 我们现在使用实际计算结果:
-            const calculatedTotalScore = heartScore + bmiScore + sleepScore + lonelinessScore + iadl1Score + iadl2Score;
-
+            // 2. 计算总风险得分
+            const calculatedTotalScore = heartScore + bmiScore + sleepScore + lonelinessScore + iadlScoreTotal;
 
             // 3. 确定风险级别
             let finalRisk = riskThresholds[riskThresholds.length - 1]; // 默认低风险
@@ -370,14 +401,16 @@
                 bmi: bmiScore,
                 sleep: sleepScore,
                 loneliness: lonelinessScore,
-                iadl1: iadl1Score,
-                iadl2: iadl2Score
+                iadlTotal: iadlScoreTotal, // 使用总分
+                iadlBreakdown: { // 增加明细以备建议使用
+                    iadl1: riskScores.iadl1, iadl2: riskScores.iadl2, iadl3: riskScores.iadl3,
+                    iadl4: riskScores.iadl4, iadl5: riskScores.iadl5, iadl6: riskScores.iadl6
+                }
             }, finalRisk, calculatedTotalScore);
 
             // 5. 更新 UI 结果
             const resultContainer = document.getElementById('risk-result-container');
             const riskScoreDisplay = document.getElementById('risk-score');
-            const riskLevelDisplay = document.getElementById('risk-level');
             const riskLevelText = document.getElementById('risk-level');
             const interventionAdvice = document.getElementById('intervention-advice');
 
@@ -399,7 +432,7 @@
             let advice = `<p class="text-lg font-bold ${finalRisk.color.replace('bg-', 'text-')}">${finalRisk.level} - ${finalRisk.text}</p>`;
             advice += '<p class="text-sm mt-2 text-gray-500">（以下建议是基于您的最高风险因子自动生成的，请结合临床判断。）</p>';
             
-            // 新增：显示所有分项得分，方便用户核对
+            // 显示所有分项得分，方便用户核对
             advice += '<div class="mt-3 p-3 bg-gray-50 rounded-lg">';
             advice += `<p class="font-semibold text-gray-800">分项得分总览 (总和: ${totalScore} 分):</p>`;
             advice += '<ul class="text-sm list-disc list-inside ml-4 mt-1 space-y-1">';
@@ -407,8 +440,19 @@
             advice += `<li class="text-emerald-700">BMI（代谢风险）: ${scores.bmi} 分</li>`;
             advice += `<li class="text-amber-700">夜间睡眠质量: ${scores.sleep} 分</li>`;
             advice += `<li class="text-pink-700">孤独感: ${scores.loneliness} 分</li>`;
-            advice += `<li class="text-indigo-700">IADL-管理钱财: ${scores.iadl1} 分</li>`;
-            advice += `<li class="text-indigo-700">IADL-服用药物: ${scores.iadl2} 分</li>`;
+            
+            // IADL 总分和明细
+            advice += `<li class="font-bold text-indigo-700">IADL总分 (6项): ${scores.iadlTotal} 分 (最高18分)</li>`;
+            const limitedIadls = Object.entries(scores.iadlBreakdown).filter(([k,v])=>v>0);
+            if(limitedIadls.length > 0) {
+                const labelMap = {iadl1: '做家务', iadl2: '做饭', iadl3: '购物', iadl4: '管理钱财', iadl5: '服药', iadl6: '打电话'};
+                limitedIadls.forEach(([key, value]) => {
+                    advice += `<li class="text-indigo-500 ml-4 list-none">↳ ${labelMap[key]}: ${value} 分 (受限)</li>`;
+                });
+            } else {
+                 advice += `<li class="text-indigo-500 ml-4 list-none">↳ 无 IADL 受限 (0 分)</li>`;
+            }
+
             advice += '</ul></div>';
 
             // 原始的干预建议生成逻辑 (只针对得分 > 0 的因子)
@@ -424,12 +468,9 @@
 
             // 2. BMI (5/8分) - 低体重或肥胖
             if (scores.bmi > 0) {
-                // 注意：在生成 advice 时，需要确保 BMI 已经计算过，这里假设了已计算
                 const height = parseFloat(document.getElementById('height').value);
                 const weight = parseFloat(document.getElementById('weight').value);
                 const bmi = weight / ((height / 100) ** 2);
-                const bmiStatus = bmi.toFixed(2);
-
                 const bmiText = (bmi < 18.5) ? '低体重/衰弱风险' : '超重/肥胖';
                 advice += `
                     <li class="font-semibold text-emerald-700">代谢健康风险：${bmiText}</li>
@@ -463,18 +504,27 @@
                 `;
             }
 
-            // 5. IADL_score (iadl1, iadl2) - 复杂功能受限 (最高6分)
-            const iadlScore = scores.iadl1 + scores.iadl2;
-            if (iadlScore > 0) {
+            // 5. IADL_score (iadlTotal) - 复杂功能受限 (最高18分)
+            if (scores.iadlTotal >= 6) { // 2项或以上受限
+                const limitedIadlsText = limitedIadls.map(([k,v])=>{
+                    const labelMap = {iadl1: '做家务', iadl2: '做饭', iadl3: '购物', iadl4: '管理钱财', iadl5: '服药', iadl6: '打电话'};
+                    return labelMap[k];
+                }).join('、');
+                
                 advice += `
-                    <li class="font-semibold text-indigo-700">复杂功能受限：IADL障碍</li>
-                    <p class="text-gray-700 text-sm">患者独立性受损，建议转介**康复师**。社区应提供**日常支持服务**（如辅助服药、管理钱财），重建患者的**自我效能感**。</p>
+                    <li class="font-semibold text-indigo-700">复杂功能受限：IADL障碍 (${scores.iadlTotal} 分)</li>
+                    <p class="text-gray-700 text-sm">患者独立性受损，建议转介**康复师和社区支持服务**。重点解决受限的**${limitedIadlsText}**，重建患者的**自我效能感**。</p>
+                `;
+            } else if (scores.iadlTotal > 0) {
+                advice += `
+                    <li class="font-semibold text-indigo-600">复杂功能受限：轻度 IADL障碍 (${scores.iadlTotal} 分)</li>
+                    <p class="text-gray-700 text-sm">患者可能在某些复杂活动上存在轻微困难，建议家庭成员或社区提供针对性支持，预防功能进一步下降。</p>
                 `;
             }
 
             advice += '</ul>';
 
-            if (finalRisk.threshold >= 15) {
+            if (finalRisk.threshold >= 21) { // 对应高风险和红色预警
                 advice += `
                     <div class="mt-4 p-3 bg-red-50 border-l-4 border-red-500">
                         <p class="font-bold text-red-800">MDT 协作建议:</p>
